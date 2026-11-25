@@ -15,7 +15,7 @@ jobs:
     timeout-minutes: 45
     steps:
       - name: Checkout
-        uses: actions/checkout@v4
+        uses: actions/checkout@v5
       - name: Install Arduino CLI
         uses: arduino/setup-arduino-cli@v2
       - name: Install ESP32 core and pinned libraries
@@ -26,12 +26,13 @@ jobs:
           arduino-cli core install esp32:esp32@3.3.4
           arduino-cli lib update-index
           arduino-cli lib install "M5GFX@0.2.17"
-          arduino-cli lib install "M5Unified@0.2.11"
-          arduino-cli board details --fqbn esp32:esp32:m5stack-fire
+          arduino-cli lib install --no-deps "M5Unified@0.2.11"
+          arduino-cli lib list
+          arduino-cli board details --fqbn esp32:esp32:m5stack_fire
       - name: Compile SpaceShooter (PSRAM disabled)
         run: |
           mkdir -p build
-          arduino-cli compile --fqbn 'esp32:esp32:m5stack-fire:PSRAM=disabled' --warnings all --output-dir build SpaceShooter
+          arduino-cli compile --fqbn 'esp32:esp32:m5stack_fire:CPUFreq=240,FlashFreq=40,FlashMode=dio,FlashSize=16M,PartitionScheme=default,DebugLevel=none,PSRAM=disabled,LoopCore=1,EventsCore=1' --warnings all --output-dir build SpaceShooter
           test -s build/SpaceShooter.ino.bin
           test -s build/SpaceShooter.ino.elf
       - name: Upload BIN, ELF and build metadata
