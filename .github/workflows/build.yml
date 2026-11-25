@@ -45,3 +45,11 @@ jobs:
             build/*.map
           if-no-files-found: error
           retention-days: 30
+      - name: Wokwi boot smoke test (generic ESP32)
+        if: github.event_name != 'pull_request'
+        uses: wokwi/wokwi-ci-action@v1
+        with:
+          token: ${{ secrets.WOKWI_TOKEN }}
+          path: .
+          timeout: 30000
+          expect_text: "DEBUG 4: vor m5.update"
