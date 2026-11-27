@@ -14,6 +14,43 @@
 //===================================================================
 #include <M5Unified.h>
 
+// Generic ESP32 simulation uses an external SPI ILI9341 and active-low keys.
+#if defined(ARDUINO_ESP32_DEV)
+class SimDisplay : public lgfx::LGFX_Device {
+  lgfx::Panel_ILI9341 panel;
+  lgfx::Bus_SPI bus;
+public:
+  SimDisplay() {
+    auto b = bus.config();
+    b.spi_host = SPI3_HOST;
+    b.spi_mode = 0;
+    b.freq_write = 27000000;
+    b.freq_read = 16000000;
+    b.pin_sclk = 18;
+    b.pin_mosi = 23;
+    b.pin_miso = 19;
+    b.pin_dc = 27;
+    bus.config(b);
+    panel.setBus(&bus);
+    auto p = panel.config();
+    p.pin_cs = 14;
+    p.pin_rst = 33;
+    p.pin_busy = -1;
+    p.panel_width = 240;
+    p.panel_height = 320;
+    p.memory_width = 240;
+    p.memory_height = 320;
+    panel.config(p);
+    setPanel(&panel);
+  }
+};
+SimDisplay simDisplay;
+#define GAME_LCD simDisplay
+#else
+#define GAME_LCD M5.Lcd
+#endif
+
+
 #define BUTTON_A_PIN 39
 #define BUTTON_B_PIN 38
 #define BUTTON_C_PIN 37
@@ -113,10 +150,16 @@ Serial.println("DEBUG 1: vor memset");
 Serial.println("DEBUG 2: vor m5.begin");
 
   M5.begin();
-  M5.Display.setRotation(1);
-  M5.Lcd.fillScreen(ILI9341_BLACK);
-  M5.Lcd.setTextColor(0x5E85);
-  M5.Lcd.setTextSize(4);
+#if defined(ARDUINO_ESP32_DEV)
+  simDisplay.init();
+  pinMode(32, INPUT_PULLUP);
+  pinMode(25, INPUT_PULLUP);
+  pinMode(26, INPUT_PULLUP);
+#endif
+  GAME_LCD.setRotation(1);
+  GAME_LCD.fillScreen(ILI9341_BLACK);
+  GAME_LCD.setTextColor(0x5E85);
+  GAME_LCD.setTextSize(4);
 
 Serial.println("DEBUG 3: vor randomseed");
   randomSeed(esp_random());  // GPIO6 ist mit dem SPI-Flash verbunden
@@ -132,26 +175,32 @@ Serial.println("DEBUG 4: vor m5.update");
 
    M5.update();
 
+#if defined(ARDUINO_ESP32_DEV)
+  if (!digitalRead(32)) { left(); }
+  if (!digitalRead(25)) { right(); }
+  if (!digitalRead(26)) { select(); }
+#else
   if(M5.BtnA.isPressed()) { left  () ;}
   if(M5.BtnB.isPressed()) { right () ;}
   if(M5.BtnC.isPressed()) { select() ;}
+#endif
 
   //-------------Start Screen--------------
   if (millis() - offsetS >= 900 and !beginGame) {
     if (!startPrinted) {
-      M5.Lcd.setCursor(77, 105);
-      M5.Lcd.print(">START<");
+      GAME_LCD.setCursor(77, 105);
+      GAME_LCD.print(">START<");
       startPrinted = true;
       offsetS = millis();
     }
     else {
-      M5.Lcd.fillRect(77, 105, 244, 32, ILI9341_BLACK);
+      GAME_LCD.fillRect(77, 105, 244, 32, ILI9341_BLACK);
       startPrinted = false;
       offsetS = millis();
     }
   }
   if (beginGame and beginGame2) {
-    M5.Lcd.fillRect(77, 105, 244, 32, ILI9341_BLACK);
+    GAME_LCD.fillRect(77, 105, 244, 32, ILI9341_BLACK);
     beginGame2 = false;
     play = true;
   }
@@ -163,7 +212,7 @@ Serial.println("DEBUG 4: vor m5.update");
   }
 
   if (oldShipX != shipX or oldShipY != shipY) {
-    M5.Lcd.fillRect(oldShipX, oldShipY, 28, 44, ILI9341_BLACK);
+    GAME_LCD.fillRect(oldShipX, oldShipY, 28, 44, ILI9341_BLACK);
     oldShipX = shipX;
     oldShipY = shipY;
     drawBitmap(shipImg, shipImgW, shipImgH, shipX, shipY, 2);
@@ -193,7 +242,7 @@ Serial.println("DEBUG 4: vor m5.update");
    if (alienLive[i]) {
     alienLiveCount += 1;
      if (alienShot(i)) {
-      M5.Lcd.fillRect(findOldAlienX(i),findOldAlienY(i),28,22,BLACK);
+      GAME_LCD.fillRect(findOldAlienX(i),findOldAlienY(i),28,22,BLACK);
       alienLiveCount -= 1;
       alienLive[i] = false;
       score += scoreInc;
@@ -225,34 +274,34 @@ void gameOver() {
   if (doSplode) {
     drawBitmap(splodedImg,splodedImgW,splodedImgH,shipX,shipY,2);
   }
-  M5.Lcd.fillScreen(ILI9341_BLACK);
+  GAME_LCD.fillScreen(ILI9341_BLACK);
   drawScore(false);
   delay(1000);
-  M5.Lcd.setCursor(17, 168);
-  M5.Lcd.setTextSize(2);
-  M5.Lcd.print("(Reset device to replay)");
+  GAME_LCD.setCursor(17, 168);
+  GAME_LCD.setTextSize(2);
+  GAME_LCD.print("(Reset device to replay)");
   while (1) { delay(100); }
 }
 
 //==================================================================
 void drawScore(boolean win) {
-  M5.Lcd.setCursor(53, 40);
-  M5.Lcd.setTextColor(ILI9341_WHITE);
-  M5.Lcd.setTextSize(4);
+  GAME_LCD.setCursor(53, 40);
+  GAME_LCD.setTextColor(ILI9341_WHITE);
+  GAME_LCD.setTextSize(4);
   if (win) {
-    M5.Lcd.print("LEVEL UP!");
+    GAME_LCD.print("LEVEL UP!");
   }
   else {
-    M5.Lcd.print("GAME OVER");
+    GAME_LCD.print("GAME OVER");
   }
   delay(1000);
-  M5.Lcd.setCursor(59, 89);
-  M5.Lcd.setTextSize(3);
-  M5.Lcd.print("Score: "); M5.Lcd.print(score);
+  GAME_LCD.setCursor(59, 89);
+  GAME_LCD.setTextSize(3);
+  GAME_LCD.print("Score: "); GAME_LCD.print(score);
   offsetM = millis();
   delay(1000);
-  M5.Lcd.setCursor(71, 128);
-  M5.Lcd.print("Level: "); M5.Lcd.print(level);
+  GAME_LCD.setCursor(71, 128);
+  GAME_LCD.print("Level: "); GAME_LCD.print(level);
 }
 
 //==================================================================
@@ -281,7 +330,7 @@ void levelUp() {
 
   for (unsigned long i = millis(); millis() - i <= 1600;) {
     if (millis() - offsetM >= 20) {
-      M5.Lcd.fillRect(oldShipX, oldShipY, 28, 44, ILI9341_BLACK);
+      GAME_LCD.fillRect(oldShipX, oldShipY, 28, 44, ILI9341_BLACK);
       drawBitmap(shipImg,shipImgW,shipImgH,shipX,shipY,2);
       drawBitmap(flamesImg,flamesImgW,flamesImgH,shipX + 1,
                  shipY + 32,2);
@@ -296,7 +345,7 @@ void levelUp() {
   shipX = 147;
   shipY = 190;
   delay(4000);
-  M5.Lcd.fillScreen(ILI9341_BLACK);
+  GAME_LCD.fillScreen(ILI9341_BLACK);
   offsetM = millis();
   play = true;
 }
@@ -337,7 +386,7 @@ boolean exceedBoundary(int num) {
 void moveAliens() {
   for (int i = 0; i < 18; i++) {
    if (alienLive[i]) {
-    M5.Lcd.fillRect(findOldAlienX(i),findOldAlienY(i),28,22,BLACK);
+    GAME_LCD.fillRect(findOldAlienX(i),findOldAlienY(i),28,22,BLACK);
     drawBitmap(alienImg,alienImgW,alienImgH,findAlienX(i),
                findAlienY(i),2);
    }
@@ -366,21 +415,21 @@ void fireDaLazer() {
    fFireAge[bulletNo] = 1;
    fFireX[bulletNo] = shipX + 13;
    fFireY[bulletNo] = shipY - 4;
-   M5.Lcd.fillRect(fFireX[bulletNo],fFireY[bulletNo],4,3,MAGENTA);
+   GAME_LCD.fillRect(fFireX[bulletNo],fFireY[bulletNo],4,3,MAGENTA);
   }
   fire = false;
 }
 
 //==================================================================
 void keepFirinDaLazer(int bulletNo) {
-  M5.Lcd.fillRect(fFireX[bulletNo],fFireY[bulletNo],4,4,BLACK);
+  GAME_LCD.fillRect(fFireX[bulletNo],fFireY[bulletNo],4,4,BLACK);
   fFireY[bulletNo] -= 8;
-  M5.Lcd.fillRect(fFireX[bulletNo],fFireY[bulletNo],4,4,MAGENTA);
+  GAME_LCD.fillRect(fFireX[bulletNo],fFireY[bulletNo],4,4,MAGENTA);
   fFireAge[bulletNo] += 1;
 }
 //==================================================================
 void stopFirinDaLazer(int bulletNo) {
-  M5.Lcd.fillRect(fFireX[bulletNo],fFireY[bulletNo],4,4,BLACK);
+  GAME_LCD.fillRect(fFireX[bulletNo],fFireY[bulletNo],4,4,BLACK);
   fFireAge[bulletNo] = 0;
 }
 
@@ -395,7 +444,7 @@ void moveShip() {
     shipY += changeShipY;
   }
   if (oldShipX != shipX or oldShipY != shipY) {
-    M5.Lcd.fillRect(oldShipX, oldShipY, 28, 44, ILI9341_BLACK);
+    GAME_LCD.fillRect(oldShipX, oldShipY, 28, 44, ILI9341_BLACK);
     oldShipX = shipX; oldShipY = shipY;
     drawBitmap(shipImg, shipImgW, shipImgH, shipX, shipY, 2);
   }
@@ -414,10 +463,10 @@ void drawBitmap(char img[],int imgW,int imgH,int x,int y,int scale){
     else if (curPix == 'G') { cellColor = 0x5E85; }
     else { continue; } // Transparent or unsupported pixel: do not draw.
     if (curPix != 'Z' and scale == 1) {
-      M5.Lcd.drawPixel(x + i % imgW, y + i / imgW, cellColor);
+      GAME_LCD.drawPixel(x + i % imgW, y + i / imgW, cellColor);
     }
     else if (curPix != 'Z' and scale > 1) {
-      M5.Lcd.fillRect(x + scale*(i%imgW),y + 
+      GAME_LCD.fillRect(x + scale*(i%imgW),y + 
          scale*(i/imgW),scale,scale,cellColor);
     }
   }
