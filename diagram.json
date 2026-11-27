@@ -9,6 +9,43 @@
       "top": 0,
       "left": 0,
       "attrs": {}
+    },
+    {
+      "type": "wokwi-ili9341",
+      "id": "lcd",
+      "top": -20,
+      "left": 220,
+      "attrs": {}
+    },
+    {
+      "type": "wokwi-pushbutton",
+      "id": "btnA",
+      "top": 260,
+      "left": 220,
+      "attrs": {
+        "label": "A",
+        "key": "A"
+      }
+    },
+    {
+      "type": "wokwi-pushbutton",
+      "id": "btnB",
+      "top": 260,
+      "left": 295,
+      "attrs": {
+        "label": "B",
+        "key": "B"
+      }
+    },
+    {
+      "type": "wokwi-pushbutton",
+      "id": "btnC",
+      "top": 260,
+      "left": 370,
+      "attrs": {
+        "label": "C",
+        "key": "C"
+      }
     }
   ],
   "connections": [
@@ -21,6 +58,96 @@
     [
       "esp:RX0",
       "$serialMonitor:TX",
+      "",
+      []
+    ],
+    [
+      "lcd:VCC",
+      "esp:3V3",
+      "",
+      []
+    ],
+    [
+      "lcd:GND",
+      "esp:GND.1",
+      "",
+      []
+    ],
+    [
+      "lcd:CS",
+      "esp:14",
+      "",
+      []
+    ],
+    [
+      "lcd:RST",
+      "esp:33",
+      "",
+      []
+    ],
+    [
+      "lcd:D/C",
+      "esp:27",
+      "",
+      []
+    ],
+    [
+      "lcd:MOSI",
+      "esp:23",
+      "",
+      []
+    ],
+    [
+      "lcd:SCK",
+      "esp:18",
+      "",
+      []
+    ],
+    [
+      "lcd:LED",
+      "esp:3V3",
+      "",
+      []
+    ],
+    [
+      "lcd:MISO",
+      "esp:19",
+      "",
+      []
+    ],
+    [
+      "btnA:1.l",
+      "esp:32",
+      "",
+      []
+    ],
+    [
+      "btnA:2.l",
+      "esp:GND.1",
+      "",
+      []
+    ],
+    [
+      "btnB:1.l",
+      "esp:25",
+      "",
+      []
+    ],
+    [
+      "btnB:2.l",
+      "esp:GND.1",
+      "",
+      []
+    ],
+    [
+      "btnC:1.l",
+      "esp:26",
+      "",
+      []
+    ],
+    [
+      "btnC:2.l",
+      "esp:GND.1",
       "",
       []
     ]
