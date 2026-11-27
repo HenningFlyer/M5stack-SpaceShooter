@@ -412,6 +412,7 @@ void drawBitmap(char img[],int imgW,int imgH,int x,int y,int scale){
     else if (curPix == 'B') { cellColor = ILI9341_BLUE; }
     else if (curPix == 'R') { cellColor = ILI9341_RED; }
     else if (curPix == 'G') { cellColor = 0x5E85; }
+    else { continue; } // Transparent or unsupported pixel: do not draw.
     if (curPix != 'Z' and scale == 1) {
       M5.Lcd.drawPixel(x + i % imgW, y + i / imgW, cellColor);
     }
