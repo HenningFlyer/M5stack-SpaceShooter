@@ -52,7 +52,20 @@ jobs:
           arduino-cli compile --fqbn 'esp32:esp32:esp32:CPUFreq=240,FlashFreq=40,FlashMode=dio,FlashSize=4M,PartitionScheme=default,DebugLevel=none,PSRAM=disabled,LoopCore=1,EventsCore=1' --warnings all --output-dir sim-build SpaceShooter
           test -s sim-build/SpaceShooter.ino.merged.bin
           test -s sim-build/SpaceShooter.ino.elf
-          sed -i 's|build/SpaceShooter|sim-build/SpaceShooter|g' wokwi.toml
+      - name: Upload interactive Wokwi project
+        if: github.event_name != 'pull_request'
+        uses: actions/upload-artifact@v4
+        with:
+          name: SpaceShooter-Wokwi-interactive
+          path: |
+            diagram.json
+            wokwi.toml
+            sim-build/SpaceShooter.ino.merged.bin
+            sim-build/SpaceShooter.ino.elf
+            SpaceShooter/SpaceShooter.ino
+            spaceshooter.test.yaml
+            libraries.txt
+          if-no-files-found: error
       - name: Wokwi boot smoke test (generic ESP32)
         if: github.event_name != 'pull_request'
         uses: wokwi/wokwi-ci-action@v1
