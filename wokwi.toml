@@ -1,4 +1,4 @@
 [wokwi]
 version = 1
-firmware = "build/SpaceShooter.ino.merged.bin"
-elf = "build/SpaceShooter.ino.elf"
+firmware = "sim-build/SpaceShooter.ino.merged.bin"
+elf = "sim-build/SpaceShooter.ino.elf"
