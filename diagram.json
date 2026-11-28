@@ -15,36 +15,37 @@
       "id": "lcd",
       "top": -20,
       "left": 220,
-      "attrs": {}
+      "attrs": {},
+      "rotate": 90
     },
     {
       "type": "wokwi-pushbutton",
       "id": "btnA",
-      "top": 260,
-      "left": 220,
+      "top": 300,
+      "left": 245,
       "attrs": {
         "label": "A",
-        "key": "A"
+        "key": "a"
       }
     },
     {
       "type": "wokwi-pushbutton",
       "id": "btnB",
-      "top": 260,
-      "left": 295,
+      "top": 300,
+      "left": 345,
       "attrs": {
         "label": "B",
-        "key": "B"
+        "key": "b"
       }
     },
     {
       "type": "wokwi-pushbutton",
       "id": "btnC",
-      "top": 260,
-      "left": 370,
+      "top": 300,
+      "left": 445,
       "attrs": {
         "label": "C",
-        "key": "C"
+        "key": "c"
       }
     }
   ],
