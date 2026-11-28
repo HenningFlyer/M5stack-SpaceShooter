@@ -1,0 +1,99 @@
+name: SpaceShooter display and buttons
+version: 1
+steps:
+  - wait-serial: 'DEBUG 4: vor m5.update'
+  - delay: 1100ms
+  - take-screenshot:
+      part-id: lcd
+      save-to: start-screen.png
+  - expect-pin:
+      part-id: esp
+      name: D26
+      value: 1
+  - set-control:
+      part-id: btnC
+      name: pressed
+      value: 1
+  - delay: 200ms
+  - expect-pin:
+      part-id: esp
+      name: D26
+      value: 0
+  - set-control:
+      part-id: btnC
+      name: pressed
+      value: 0
+  - delay: 100ms
+  - expect-pin:
+      part-id: esp
+      name: D26
+      value: 1
+  - expect-pin:
+      part-id: esp
+      name: D32
+      value: 1
+  - set-control:
+      part-id: btnA
+      name: pressed
+      value: 1
+  - delay: 200ms
+  - expect-pin:
+      part-id: esp
+      name: D32
+      value: 0
+  - set-control:
+      part-id: btnA
+      name: pressed
+      value: 0
+  - delay: 100ms
+  - expect-pin:
+      part-id: esp
+      name: D32
+      value: 1
+  - expect-pin:
+      part-id: esp
+      name: D25
+      value: 1
+  - set-control:
+      part-id: btnB
+      name: pressed
+      value: 1
+  - delay: 200ms
+  - expect-pin:
+      part-id: esp
+      name: D25
+      value: 0
+  - set-control:
+      part-id: btnB
+      name: pressed
+      value: 0
+  - delay: 100ms
+  - expect-pin:
+      part-id: esp
+      name: D25
+      value: 1
+  - expect-pin:
+      part-id: esp
+      name: D26
+      value: 1
+  - set-control:
+      part-id: btnC
+      name: pressed
+      value: 1
+  - delay: 200ms
+  - expect-pin:
+      part-id: esp
+      name: D26
+      value: 0
+  - set-control:
+      part-id: btnC
+      name: pressed
+      value: 0
+  - delay: 100ms
+  - expect-pin:
+      part-id: esp
+      name: D26
+      value: 1
+  - take-screenshot:
+      part-id: lcd
+      save-to: gameplay.png
