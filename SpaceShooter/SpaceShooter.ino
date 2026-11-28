@@ -16,8 +16,9 @@
 
 // Generic ESP32 simulation uses an external SPI ILI9341 and active-low keys.
 #if defined(ARDUINO_ESP32_DEV)
+#include <lgfx/v1/panel/Panel_ILI9341.hpp>
 class SimDisplay : public lgfx::LGFX_Device {
-  lgfx::Panel_ILI9341 panel;
+  lgfx::Panel_ILI9341 _panel_instance;
   lgfx::Bus_SPI bus;
 public:
   SimDisplay() {
@@ -31,8 +32,8 @@ public:
     b.pin_miso = 19;
     b.pin_dc = 27;
     bus.config(b);
-    panel.setBus(&bus);
-    auto p = panel.config();
+    _panel_instance.setBus(&bus);
+    auto p = _panel_instance.config();
     p.pin_cs = 14;
     p.pin_rst = 33;
     p.pin_busy = -1;
@@ -40,8 +41,8 @@ public:
     p.panel_height = 320;
     p.memory_width = 240;
     p.memory_height = 320;
-    panel.config(p);
-    setPanel(&panel);
+    _panel_instance.config(p);
+    setPanel(&_panel_instance);
   }
 };
 SimDisplay simDisplay;
