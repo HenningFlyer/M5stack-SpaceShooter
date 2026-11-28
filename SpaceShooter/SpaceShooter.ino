@@ -12,45 +12,18 @@
 // Github:https://macsbug.wordpress.com/2018/01/12/esp32-spaceshooter-with-m5stack/
 // Anpassung an M5Stack FIRE 22.11.2026 Henning Stöcklein
 //===================================================================
-#include <M5Unified.h>
-
-// Generic ESP32 simulation uses an external SPI ILI9341 and active-low keys.
+// The simulated ESP32 uses an independent Adafruit display driver.
 #if defined(ARDUINO_ESP32_DEV)
-#include <lgfx/v1/panel/Panel_ILI9341.hpp>
-class SimDisplay : public lgfx::LGFX_Device {
-  lgfx::Panel_ILI9341 _panel_instance;
-  lgfx::Bus_SPI bus;
-public:
-  SimDisplay() {
-    auto b = bus.config();
-    b.spi_host = SPI3_HOST;
-    b.spi_mode = 0;
-    b.freq_write = 27000000;
-    b.freq_read = 16000000;
-    b.pin_sclk = 18;
-    b.pin_mosi = 23;
-    b.pin_miso = 19;
-    b.pin_dc = 27;
-    bus.config(b);
-    _panel_instance.setBus(&bus);
-    auto p = _panel_instance.config();
-    p.pin_cs = 14;
-    p.pin_rst = 33;
-    p.pin_busy = -1;
-    p.panel_width = 240;
-    p.panel_height = 320;
-    p.memory_width = 240;
-    p.memory_height = 320;
-    _panel_instance.config(p);
-    setPanel(&_panel_instance);
-  }
-};
-SimDisplay simDisplay;
+#include <Arduino.h>
+#include <SPI.h>
+#include <Adafruit_ILI9341.h>
+Adafruit_ILI9341 simDisplay(14, 27, 33);
 #define GAME_LCD simDisplay
+#define BLACK ILI9341_BLACK
 #else
+#include <M5Unified.h>
 #define GAME_LCD M5.Lcd
 #endif
-
 
 #define BUTTON_A_PIN 39
 #define BUTTON_B_PIN 38
@@ -150,12 +123,14 @@ Serial.println("DEBUG 1: vor memset");
 
 Serial.println("DEBUG 2: vor m5.begin");
 
-  M5.begin();
-#if defined(ARDUINO_ESP32_DEV)
-  simDisplay.init();
+ #if defined(ARDUINO_ESP32_DEV)
+  SPI.begin(18, 19, 23, 14);
+  simDisplay.begin(27000000);
   pinMode(32, INPUT_PULLUP);
   pinMode(25, INPUT_PULLUP);
   pinMode(26, INPUT_PULLUP);
+#else
+  M5.begin();
 #endif
   GAME_LCD.setRotation(1);
   GAME_LCD.fillScreen(ILI9341_BLACK);
@@ -174,7 +149,9 @@ void loop()
 {
 Serial.println("DEBUG 4: vor m5.update");
 
+#if !defined(ARDUINO_ESP32_DEV)
    M5.update();
+#endif
 
 #if defined(ARDUINO_ESP32_DEV)
   if (!digitalRead(32)) { left(); }
@@ -265,7 +242,9 @@ Serial.println("DEBUG 4: vor m5.update");
   if (alienLiveCount == 0) {
     levelUp();
   }
+#if !defined(ARDUINO_ESP32_DEV)
   M5.update();
+#endif
   delay(1);
 }
 
