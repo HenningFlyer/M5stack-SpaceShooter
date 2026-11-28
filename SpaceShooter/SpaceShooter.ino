@@ -20,6 +20,8 @@
 Adafruit_ILI9341 simDisplay(14, 27, 33);
 #define GAME_LCD simDisplay
 #define BLACK ILI9341_BLACK
+#define MAGENTA ILI9341_MAGENTA
+#define GREEN ILI9341_GREEN
 #else
 #include <M5Unified.h>
 #define GAME_LCD M5.Lcd
@@ -123,7 +125,7 @@ Serial.println("DEBUG 1: vor memset");
 
 Serial.println("DEBUG 2: vor m5.begin");
 
- #if defined(ARDUINO_ESP32_DEV)
+#if defined(ARDUINO_ESP32_DEV)
   SPI.begin(18, 19, 23, 14);
   simDisplay.begin(27000000);
   pinMode(32, INPUT_PULLUP);
