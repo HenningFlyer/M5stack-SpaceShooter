@@ -5,7 +5,7 @@ Source: Tyler Edwards (Hackerboxes #0020), M5Stack port by macsbug, Fire/M5Unifi
 
 ## Known-working baseline
 
-The initial source under [SpaceShooter/SpaceShooter.ino](SpaceShooter/SpaceShooter.ino) is the version previously confirmed to run without crashes on the physical M5Stack Fire. It is **not yet verified** in GitHub Actions or a hardware simulator.
+The initial source under [SpaceShooter/SpaceShooter.ino](SpaceShooter/SpaceShooter.ino) is the version previously confirmed to run without crashes on the physical M5Stack Fire. GitHub Actions now builds the physical FIRE and a separate generic ESP32 simulation firmware.
 
 Controls: **A = left**, **B = right**, **C = start/fire** (as implemented in source).
 
@@ -22,16 +22,20 @@ Build settings:
 
 You can also launch the build with **Actions > ESP32 firmware build > Run workflow**. The uploaded application `.bin` is intended for an application-aware loader such as M5Launcher, **not** for flashing at address zero as a complete ESP32 flash image.
 
-## Simulation status
+## Play in the Wokwi browser
 
-The M5Stack Fire is **not** fully simulated yet. Wokwi can emulate generic ESP32 firmware and supported ILI9341 display parts, but M5Unified's board autodetection, display pins, internal power controller and button mapping must all be validated. A successful compile is **not** proof that the game will run in a virtual Fire or on physical hardware.
+1. Open https://wokwi.com/projects/new/esp32 (Arduino ESP32).
+2. Replace the editor sketch with the contents of [SpaceShooter.ino](SpaceShooter/SpaceShooter.ino).
+3. Replace the editor's diagram.json with [diagram.json](diagram.json).
+4. Add the libraries listed in [libraries.txt](libraries.txt) using Library Manager (or paste the file if available).
+5. Start simulation, click the simulation area to focus it, then press C to start. A moves left, B moves right, C fires. The on-screen buttons can also be held with the mouse.
+6. Stop and restart to reset the game. Save the project to your Wokwi account to obtain a shareable project link.
 
-### Next checks
+The browser uses the generic ESP32 Arduino board (ARDUINO_ESP32_DEV), not the physical FIRE target. The TFT part is rotated 90 degrees for landscape presentation; the firmware retains its existing logical 320x240 drawing coordinates.
 
-1. Verify GitHub Actions build completes and inspect BIN/ELF output.
-2. Verify ESP32/M5Stack Fire hardware and SPI display pins before adding a Wokwi diagram.
-3. Add a minimal boot/display test and an explicit simulation adaptation if necessary.
-4. Add repeatable gameplay checks (buttons, shots, collision, Game Over, reset).
+For the precompiled version, download the SpaceShooter-Wokwi-interactive artifact from the latest successful [Actions run](https://github.com/HenningFlyer/M5stack-SpaceShooter/actions), extract it and open the folder with Wokwi for VS Code. The configuration points to the separate 4 MB merged firmware, not the FIRE binary.
+
+The previous CI run 46120813686 verified boot, active-low GPIO buttons and different non-uniform screenshots. The new browser layout must still be checked visually. The screenshot capture may retain native panel orientation even when the browser part is rotated. RGB LEDs, speaker and other FIRE hardware are not simulated.
 
 ## Warnings
 
