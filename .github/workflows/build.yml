@@ -61,3 +61,36 @@ jobs:
           path: .
           timeout: 30000
           expect_text: "DEBUG 4: vor m5.update"
+      - name: Wokwi display and button functional test
+        if: github.event_name != 'pull_request'
+        uses: wokwi/wokwi-ci-action@v1
+        with:
+          token: ${{ secrets.WOKWI_TOKEN }}
+          path: .
+          timeout: 60000
+          scenario: spaceshooter.test.yaml
+      - name: Validate captured display frames
+        if: github.event_name != 'pull_request'
+        run: |
+          python3 -m pip install Pillow
+          python3 - <<'PY'
+          from PIL import Image, ImageChops
+          frames = []
+          for name in ("start-screen.png", "gameplay.png"):
+              with Image.open(name) as image:
+                  frame = image.convert("RGB")
+                  assert sorted(frame.size) == [240, 320], (name, frame.size)
+                  assert len(frame.getcolors(320 * 240)) > 1, f"{name}: uniform display"
+                  frames.append(frame)
+          assert ImageChops.difference(*frames).getbbox(), "Display did not change"
+          print("Display frames are non-uniform and differ")
+          PY
+      - name: Upload Wokwi display screenshots
+        if: always() && github.event_name != 'pull_request'
+        uses: actions/upload-artifact@v4
+        with:
+          name: SpaceShooter-Wokwi-display
+          path: |
+            start-screen.png
+            gameplay.png
+          if-no-files-found: warn
